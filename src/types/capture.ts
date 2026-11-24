@@ -229,6 +229,17 @@ export const PLATFORM_SPECS: PlatformSpec[] = [
   },
 ];
 
+export type MultiCamLayout = 'single' | 'split_2' | 'pip' | 'quad_4';
+export type PipCorner = 'br' | 'bl' | 'tr' | 'tl';
+
+export interface CameraSlotConfig {
+  id: number;
+  label: string;
+  sourceType: 'demo' | 'usb' | 'yealink_vc800';
+  demoFeed: DemoFeedId;
+  deviceId: string;
+}
+
 export const DEFAULT_CAPTURE_SETTINGS: CaptureSettings = {
   deviceProfile: 'android10_micro_usb',
   resolutionWidth: 1920,
@@ -246,7 +257,7 @@ export const DEFAULT_CAPTURE_SETTINGS: CaptureSettings = {
   cropY: 0,
   cropW: 100,
   cropH: 100,
-  sdStoragePath: '/storage/sdcard1/DCIM/KaptureOTG',
+  sdStoragePath: '/storage/sdcard1/DCIM/M2RStudio',
   sdSplitGb: 4,
   watermarkFree: true,
   targetPlatform: 'youtube',

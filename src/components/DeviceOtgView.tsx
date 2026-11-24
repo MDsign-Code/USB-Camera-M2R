@@ -22,6 +22,7 @@ import {
 import { downloadBlob, getStorageQuota, type StorageQuotaInfo } from '../lib/storage';
 import { buildAndDownloadAndroidApkProject } from '../lib/androidApkExporter';
 import { PWAInstallButton } from './PWAInstallButton';
+import { useUsbOtgDetector } from '../hooks/useUsbOtgDetector';
 
 interface DeviceOtgViewProps {
   activeProject: CaptureProject;
@@ -45,15 +46,22 @@ export function DeviceOtgView({
   onChangeThemeMode,
   onChangeProfile,
 }: DeviceOtgViewProps) {
-  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const {
+    videoDevices,
+    audioDevices,
+    usbHardwareList,
+    usbPermissionError,
+    isScanning,
+    scanDevices,
+    requestWebUsbOtgDevice,
+  } = useUsbOtgDetector();
   const [quota, setQuota] = useState<StorageQuotaInfo>({
     usageBytes: 0,
     quotaBytes: 0,
     supported: false,
   });
-  const [scanning, setScanning] = useState<boolean>(false);
-  const [apkPackageId, setApkPackageId] = useState<string>('com.kaptureotg.studio');
-  const [apkAppName, setApkAppName] = useState<string>('KaptureOTG');
+  const [apkPackageId, setApkPackageId] = useState<string>('com.m2rstudio.capture');
+  const [apkAppName, setApkAppName] = useState<string>('M2R Studio');
   const [apkVersion, setApkVersion] = useState<string>('1.0.0');
   const [apkMinSdk, setApkMinSdk] = useState<number>(24);
   const [apkNotice, setApkNotice] = useState<string | null>(null);
@@ -89,21 +97,13 @@ export function DeviceOtgView({
   ]);
 
   const refreshHardwareInfo = async () => {
-    setScanning(true);
-    try {
-      if (navigator.mediaDevices?.enumerateDevices) {
-        const list = await navigator.mediaDevices.enumerateDevices();
-        setDevices(list.filter((d) => d.kind === 'videoinput' || d.kind === 'audioinput'));
-      }
-      const q = await getStorageQuota();
-      setQuota(q);
-    } finally {
-      setScanning(false);
-    }
+    await scanDevices();
+    const q = await getStorageQuota();
+    setQuota(q);
   };
 
   useEffect(() => {
-    void refreshHardwareInfo();
+    void getStorageQuota().then(setQuota);
   }, []);
 
   const toggleDiagnostic = (id: string) => {
@@ -114,7 +114,7 @@ export function DeviceOtgView({
 
   const exportAndroidOtgProfileJson = () => {
     const configPayload = {
-      app: 'KaptureOTG',
+      app: 'M2R Studio',
       exportedAt: new Date().toISOString(),
       targetAndroidMinSdk: 24,
       targetAndroidLegacyCompat: activeProject.deviceProfile === 'android10_micro_usb',
@@ -160,17 +160,17 @@ export function DeviceOtgView({
     const blob = new Blob([JSON.stringify(configPayload, null, 2)], {
       type: 'application/json',
     });
-    downloadBlob(blob, `kaptureotg-android-profile-${activeProject.deviceProfile}.json`);
+    downloadBlob(blob, `m2rstudio-android-profile-${activeProject.deviceProfile}.json`);
   };
 
   const liveAppUrl =
-    typeof window !== 'undefined' ? window.location.origin : 'https://kaptureotg.app';
+    typeof window !== 'undefined' ? window.location.origin : 'https://m2rstudio.app';
 
   const handleExportApkPackage = () => {
     const file = buildAndDownloadAndroidApkProject({
       appUrl: liveAppUrl,
       packageId: apkPackageId,
-      appName: apkAppName.trim() || 'KaptureOTG',
+      appName: apkAppName.trim() || 'M2R Studio',
       versionName: apkVersion.trim() || '1.0.0',
       versionCode: 1,
       minSdk: apkMinSdk,
@@ -447,31 +447,69 @@ export function DeviceOtgView({
           </div>
         </div>
 
-        {/* Detected USB UVC & Audio Hardware */}
+        {/* Detected USB UVC & Audio Hardware (Real-time Hot-Plug + WebUSB OTG) */}
         <div className="p-5 rounded-xl bg-white dark:bg-[#111419] border border-zinc-200 dark:border-zinc-800 space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-              Perangkat Input Terdeteksi
+              Perangkat USB OTG & Input Terdeteksi
             </h3>
             <button
               type="button"
               onClick={() => void refreshHardwareInfo()}
               className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100 inline-flex items-center gap-1"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${scanning ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${isScanning ? 'animate-spin' : ''}`} />
               Segarkan
             </button>
           </div>
 
-          {devices.length === 0 ? (
+          <button
+            type="button"
+            onClick={() => void requestWebUsbOtgDevice()}
+            className="w-full min-h-[40px] px-3 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 text-xs font-semibold inline-flex items-center justify-center gap-2 hover:opacity-90 transition-opacity"
+          >
+            <Usb className="w-3.5 h-3.5" />
+            Pindai & Beri Izin USB OTG (WebUSB)
+          </button>
+
+          {usbPermissionError && (
+            <p className="text-[11px] text-amber-700 dark:text-amber-300 leading-relaxed">
+              {usbPermissionError}
+            </p>
+          )}
+
+          {usbHardwareList.length > 0 && (
+            <div className="divide-y divide-zinc-200 dark:divide-zinc-800 pt-1">
+              {usbHardwareList.map((hw) => (
+                <div key={hw.key} className="py-2 flex items-center justify-between gap-2 text-xs">
+                  <div className="min-w-0">
+                    <div className="font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                      {hw.name}
+                    </div>
+                    <div className="text-[11px] text-zinc-500 dark:text-zinc-400">
+                      {hw.manufacturer}
+                    </div>
+                  </div>
+                  <span className="font-mono text-[11px] text-emerald-600 dark:text-emerald-400 shrink-0">
+                    {hw.vendorHex}:{hw.productHex}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {videoDevices.length === 0 && audioDevices.length === 0 ? (
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              Belum ada perangkat USB UVC atau mikrofon eksternal yang terbaca. Sambungkan kartu
-              HDMI Capture USB lalu tekan Segarkan.
+              Pemantauan colok-otomatis aktif. Sambungkan kartu HDMI Capture USB OTG lalu izinkan
+              akses kamera/USB pada Chrome Android.
             </p>
           ) : (
             <div className="divide-y divide-zinc-200 dark:divide-zinc-800">
-              {devices.map((dev, i) => (
-                <div key={`${dev.deviceId}_${i}`} className="py-2.5 flex items-center justify-between gap-2 text-xs">
+              {[...videoDevices, ...audioDevices].map((dev, i) => (
+                <div
+                  key={`${dev.deviceId}_${i}`}
+                  className="py-2.5 flex items-center justify-between gap-2 text-xs"
+                >
                   <span className="text-zinc-800 dark:text-zinc-200 truncate">
                     {dev.label ||
                       (dev.kind === 'videoinput'

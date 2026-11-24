@@ -15,9 +15,9 @@ export default defineConfig(() => {
         includeAssets: ['icon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png', 'pwa-maskable-512x512.png'],
         manifest: {
           id: '/',
-          name: 'KaptureOTG — Android USB Video Capture',
-          short_name: 'KaptureOTG',
-          description: 'Studio perekaman Android USB Video Capture latensi rendah untuk Micro-USB OTG & USB-C dengan penyimpanan kartu SD langsung.',
+          name: 'M2R Studio — Android USB Video Capture',
+          short_name: 'M2R Studio',
+          description: 'M2R Studio: perekam Android USB Video Capture multi-kamera latensi rendah, remote Yealink VC800, Micro-USB OTG & kartu SD langsung.',
           theme_color: '#090B0E',
           background_color: '#090B0E',
           display: 'standalone',

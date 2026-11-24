@@ -106,13 +106,13 @@ export interface ApkExportOptions {
 }
 
 export function buildAndDownloadAndroidApkProject(opts: ApkExportOptions): string {
-  const safePkg = opts.packageId.replace(/[^a-zA-Z0-9.]/g, '').toLowerCase() || 'com.kaptureotg.studio';
+  const safePkg = opts.packageId.replace(/[^a-zA-Z0-9.]/g, '').toLowerCase() || 'com.m2rstudio.capture';
   const pkgPath = safePkg.replace(/\./g, '/');
   const originHost = (() => {
     try {
       return new URL(opts.appUrl).host;
     } catch {
-      return 'kaptureotg.app';
+      return 'm2rstudio.app';
     }
   })();
 
@@ -132,8 +132,8 @@ Paket ini berisi proyek Android lengkap yang sudah dikonfigurasi khusus untuk:
 
 ## Cara 1: Build APK Otomatis Tanpa Install Android Studio (GitHub Actions)
 1. Ekstrak file ZIP ini dan unggah ke repositori GitHub baru.
-2. Buka tab **Actions** di GitHub, lalu jalankan workflow **Build KaptureOTG Android APK**.
-3. Setelah selesai (~2 menit), unduh file **KaptureOTG-debug.apk** dari bagian **Artifacts** dan pasang langsung ke HP Android Anda.
+2. Buka tab **Actions** di GitHub, lalu jalankan workflow **Build M2R Studio Android APK**.
+3. Setelah selesai (~2 menit), unduh file **M2RStudio-Android-APK** dari bagian **Artifacts** dan pasang langsung ke HP Android Anda.
 
 ## Cara 2: Build APK Lokal dengan Android Studio / Gradle
 1. Pastikan **JDK 17** dan **Android Studio (SDK 34)** sudah terpasang.
@@ -180,7 +180,7 @@ npx @bubblewrap/cli build
           packageId: safePkg,
           host: originHost,
           name: opts.appName,
-          launcherName: 'KaptureOTG',
+          launcherName: 'M2R Studio',
           display: 'standalone',
           themeColor: '#090B0E',
           navigationColor: '#090B0E',
@@ -238,7 +238,7 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "KaptureOTG"
+rootProject.name = "M2RStudio"
 include ':app'
 `,
     },
@@ -353,8 +353,11 @@ dependencies {
     <!-- USB Video Class (UVC) — Micro-USB & USB-C HDMI/AV Video Capture Devices -->
     <usb-device class="14" subclass="1" />
     <usb-device class="14" subclass="2" />
-    <!-- MacroSilicon MS2109 / MS2130 HDMI-to-USB Capture Cards -->
+    <!-- Yealink Video Conferencing / UVC Devices (0x6993 = 27027) -->
+    <usb-device vendor-id="27027" />
+    <!-- MacroSilicon MS2109 (0x534D = 21325) & MS2130 (0x345F = 13407) HDMI-to-USB Capture Cards -->
     <usb-device vendor-id="21325" />
+    <usb-device vendor-id="13407" />
     <!-- Miscellaneous IAD Composite UVC + UAC Devices -->
     <usb-device class="239" subclass="2" protocol="1" />
 </resources>
@@ -464,7 +467,7 @@ public class MainActivity extends AppCompatActivity {
     },
     {
       path: '.github/workflows/build-apk.yml',
-      content: `name: Build KaptureOTG Android APK
+      content: `name: Build M2R Studio Android APK
 
 on:
   workflow_dispatch:
@@ -491,16 +494,16 @@ jobs:
         working-directory: android
         run: gradle assembleDebug
 
-      - name: Upload KaptureOTG APK Artifact
+      - name: Upload M2R Studio APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: KaptureOTG-Android-APK
+          name: M2RStudio-Android-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
 `,
     },
   ];
 
-  const filename = `KaptureOTG-Android-APK-Project-v${opts.versionName}.zip`;
+  const filename = `M2RStudio-Android-APK-Project-v${opts.versionName}.zip`;
   const zipBlob = createZipBlob(entries);
   downloadBlob(zipBlob, filename);
   return filename;

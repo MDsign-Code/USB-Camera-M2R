@@ -65,10 +65,10 @@ export function ExportPublishView({
   const [selectedPlatform, setSelectedPlatform] = useState<PublishPlatform>('youtube');
   const [publishTitle, setPublishTitle] = useState<string>('');
   const [publishDesc, setPublishDesc] = useState<string>(
-    'Direkam tanpa tanda air menggunakan KaptureOTG Android USB Video Capture.'
+    'Direkam tanpa tanda air menggunakan M2R Studio Android USB Video Capture.'
   );
   const [publishTags, setPublishTags] = useState<string>(
-    '#KaptureOTG #USBCapture #VideoProduction'
+    '#M2RStudio #USBCapture #VideoProduction'
   );
   const [publishVisibility, setPublishVisibility] = useState<'public' | 'unlisted' | 'private'>(
     'public'
@@ -169,7 +169,7 @@ export function ExportPublishView({
         );
       }
 
-      let finalTarget = `${selectedClip.storageTarget.split('/').slice(0, -1).join('/') || '/storage/sdcard1/DCIM/KaptureOTG'}/${safeFilename}`;
+      let finalTarget = `${selectedClip.storageTarget.split('/').slice(0, -1).join('/') || '/storage/sdcard1/DCIM/M2RStudio'}/${safeFilename}`;
 
       if (sdDirectory) {
         try {

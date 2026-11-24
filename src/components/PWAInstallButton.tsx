@@ -30,7 +30,7 @@ export function PWAInstallButton({ variant = 'compact', onExportApk }: PWAInstal
               Aplikasi Android Terpasang
             </h3>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              KaptureOTG berjalan dalam mode layar penuh standalone tanpa bilah browser.
+              M2R Studio berjalan dalam mode layar penuh standalone tanpa bilah browser.
             </p>
           </div>
           <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
@@ -47,7 +47,7 @@ export function PWAInstallButton({ variant = 'compact', onExportApk }: PWAInstal
     if (isInstallable) {
       const outcome = await install();
       if (outcome === 'accepted') {
-        setInstallNote('KaptureOTG sedang dipasang ke layar utama Android Anda.');
+        setInstallNote('M2R Studio sedang dipasang ke layar utama Android Anda.');
       }
       return;
     }
@@ -77,7 +77,7 @@ export function PWAInstallButton({ variant = 'compact', onExportApk }: PWAInstal
                 <span>Instal Aplikasi di Android</span>
               </div>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                Pasang KaptureOTG langsung ke layar utama Android (mendukung Android 7.0 – 10.0
+                Pasang M2R Studio langsung ke layar utama Android (mendukung Android 7.0 – 10.0
                 Micro-USB & Android 11+) agar berjalan layar penuh seperti aplikasi native dan tetap
                 bisa merekam saat offline.
               </p>
@@ -127,12 +127,12 @@ export function PWAInstallButton({ variant = 'compact', onExportApk }: PWAInstal
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h3 className="text-base font-semibold text-zinc-900 dark:text-zinc-100">
-                  {isIOS ? 'Instal KaptureOTG di iPhone / iPad' : 'Instal KaptureOTG di Android'}
+                  {isIOS ? 'Instal M2R Studio di iPhone / iPad' : 'Instal M2R Studio di Android'}
                 </h3>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   {isIOS
                     ? 'Tambahkan aplikasi ke Layar Utama Safari untuk mode layar penuh.'
-                    : 'Jalankan KaptureOTG sebagai aplikasi Android mandiri (PWA) dengan dukungan Micro-USB OTG & offline.'}
+                    : 'Jalankan M2R Studio sebagai aplikasi Android mandiri (PWA) dengan dukungan Micro-USB OTG & offline.'}
                 </p>
               </div>
               <button
@@ -154,7 +154,7 @@ export function PWAInstallButton({ variant = 'compact', onExportApk }: PWAInstal
                   Gulir ke bawah lalu pilih <strong>Tambahkan ke Layar Utama</strong>.
                 </li>
                 <li>
-                  Ketuk <strong>Tambah</strong> untuk memasang ikon KaptureOTG.
+                  Ketuk <strong>Tambah</strong> untuk memasang ikon M2R Studio.
                 </li>
               </ol>
             ) : (

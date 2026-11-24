@@ -492,7 +492,7 @@ function StudioWorkspace() {
           onClick={() => setActiveTab('capture')}
           className="text-base font-bold tracking-tight text-zinc-900 dark:text-zinc-100 whitespace-nowrap shrink-0 cursor-pointer"
         >
-          KaptureOTG
+          M2R Studio
         </button>
 
         {/* Zone 2: 4 single-line text navigation links */}
