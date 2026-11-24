@@ -39,6 +39,7 @@ import {
   saveClipBlobToCache,
   type DirectoryHandleLike,
 } from '../lib/storage';
+import { PWAInstallButton } from './PWAInstallButton';
 
 const DEMO_FEEDS: { id: DemoFeedId; label: string; src?: string }[] = [
   {
@@ -803,29 +804,32 @@ export function CaptureStudio({
             </p>
           </div>
 
-          <div className="flex items-center gap-1 p-1 rounded-lg bg-zinc-200/70 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-            <button
-              type="button"
-              onClick={() => setSourceMode('demo')}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${
-                sourceMode === 'demo'
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-              }`}
-            >
-              Simulasi HDMI
-            </button>
-            <button
-              type="button"
-              onClick={() => void connectUsbStream(selectedVideoId, selectedAudioId)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${
-                sourceMode === 'usb'
-                  ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
-              }`}
-            >
-              USB UVC Langsung
-            </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <PWAInstallButton variant="compact" />
+            <div className="flex items-center gap-1 p-1 rounded-lg bg-zinc-200/70 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
+              <button
+                type="button"
+                onClick={() => setSourceMode('demo')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${
+                  sourceMode === 'demo'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                }`}
+              >
+                Simulasi HDMI
+              </button>
+              <button
+                type="button"
+                onClick={() => void connectUsbStream(selectedVideoId, selectedAudioId)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap shrink-0 ${
+                  sourceMode === 'usb'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 shadow-xs'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                }`}
+              >
+                USB UVC Langsung
+              </button>
+            </div>
           </div>
         </div>
 

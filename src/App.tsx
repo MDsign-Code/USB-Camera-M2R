@@ -34,6 +34,7 @@ import { CaptureStudio } from './components/CaptureStudio';
 import { ExportPublishView } from './components/ExportPublishView';
 import { ProjectsCloudView } from './components/ProjectsCloudView';
 import { DeviceOtgView } from './components/DeviceOtgView';
+import { OfflineIndicator } from './components/PWAInstallButton';
 
 type AppTab = 'capture' | 'export' | 'projects' | 'device';
 
@@ -619,6 +620,7 @@ function StudioWorkspace() {
       </main>
 
       {/* Mobile Bottom Thumb Navigation (<= 56px, under 15% mobile sticky cap with 56px top bar) */}
+      <OfflineIndicator />
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 h-14 pb-safe bg-white/95 dark:bg-[#090B0E]/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800 grid grid-cols-4 items-center">
         {navItems.map((item) => {
           const Icon = item.icon;

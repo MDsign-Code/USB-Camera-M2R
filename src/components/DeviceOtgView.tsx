@@ -18,6 +18,7 @@ import {
   type ThemeMode,
 } from '../types/capture';
 import { downloadBlob, getStorageQuota, type StorageQuotaInfo } from '../lib/storage';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface DeviceOtgViewProps {
   activeProject: CaptureProject;
@@ -270,8 +271,10 @@ export function DeviceOtgView({
         </div>
       </section>
 
-      {/* Right 5 Columns: Auto Dark Mode, Detected USB Devices & Storage Quota */}
+      {/* Right 5 Columns: Android PWA Install, Auto Dark Mode, Detected USB Devices & Storage Quota */}
       <aside className="lg:col-span-5 space-y-6">
+        <PWAInstallButton variant="card" />
+
         {/* Automatic Dark Mode Control */}
         <div className="p-5 rounded-xl bg-white dark:bg-[#111419] border border-zinc-200 dark:border-zinc-800 space-y-4">
           <div>
