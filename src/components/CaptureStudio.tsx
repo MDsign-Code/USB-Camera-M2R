@@ -70,6 +70,7 @@ interface CaptureStudioProps {
   onSaveProjectNow: () => void;
   onRecordingFinished: (recording: CaptureRecording, blob: Blob) => Promise<void>;
   onNavigateExport: () => void;
+  onNavigateApkExport: () => void;
 }
 
 export function CaptureStudio({
@@ -82,6 +83,7 @@ export function CaptureStudio({
   onSaveProjectNow,
   onRecordingFinished,
   onNavigateExport,
+  onNavigateApkExport,
 }: CaptureStudioProps) {
   const [sourceMode, setSourceMode] = useState<'demo' | 'usb'>('demo');
   const [demoFeed, setDemoFeed] = useState<DemoFeedId>('studio_desk');
@@ -805,7 +807,7 @@ export function CaptureStudio({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            <PWAInstallButton variant="compact" />
+            <PWAInstallButton variant="compact" onExportApk={onNavigateApkExport} />
             <div className="flex items-center gap-1 p-1 rounded-lg bg-zinc-200/70 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
               <button
                 type="button"

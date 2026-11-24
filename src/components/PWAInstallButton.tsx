@@ -12,9 +12,10 @@ import { useOnlineStatus, usePWAInstall } from '../hooks/usePWAInstall';
 
 interface PWAInstallButtonProps {
   variant?: 'compact' | 'card';
+  onExportApk?: () => void;
 }
 
-export function PWAInstallButton({ variant = 'compact' }: PWAInstallButtonProps) {
+export function PWAInstallButton({ variant = 'compact', onExportApk }: PWAInstallButtonProps) {
   const { isInstallable, isInstalled, isIOS, isInIframe, install } = usePWAInstall();
   const [showGuide, setShowGuide] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
@@ -203,6 +204,19 @@ export function PWAInstallButton({ variant = 'compact' }: PWAInstallButtonProps)
                     {copiedUrl ? 'Tautan Disalin' : 'Salin Tautan'}
                   </button>
                 </div>
+
+                {onExportApk && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowGuide(false);
+                      onExportApk();
+                    }}
+                    className="w-full min-h-[40px] px-3.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-xs font-semibold text-zinc-800 dark:text-zinc-200 transition-colors"
+                  >
+                    Atau Ekspor Proyek APK Android (.zip / PWABuilder)
+                  </button>
+                )}
               </div>
             )}
 

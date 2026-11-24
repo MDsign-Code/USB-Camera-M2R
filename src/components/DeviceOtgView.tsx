@@ -3,9 +3,11 @@ import {
   CheckCircle2,
   Cpu,
   Download,
+  ExternalLink,
   HardDrive,
   Monitor,
   Moon,
+  Package,
   RefreshCw,
   Smartphone,
   Sun,
@@ -18,6 +20,7 @@ import {
   type ThemeMode,
 } from '../types/capture';
 import { downloadBlob, getStorageQuota, type StorageQuotaInfo } from '../lib/storage';
+import { buildAndDownloadAndroidApkProject } from '../lib/androidApkExporter';
 import { PWAInstallButton } from './PWAInstallButton';
 
 interface DeviceOtgViewProps {
@@ -49,6 +52,11 @@ export function DeviceOtgView({
     supported: false,
   });
   const [scanning, setScanning] = useState<boolean>(false);
+  const [apkPackageId, setApkPackageId] = useState<string>('com.kaptureotg.studio');
+  const [apkAppName, setApkAppName] = useState<string>('KaptureOTG');
+  const [apkVersion, setApkVersion] = useState<string>('1.0.0');
+  const [apkMinSdk, setApkMinSdk] = useState<number>(24);
+  const [apkNotice, setApkNotice] = useState<string | null>(null);
   const [diagnostics, setDiagnostics] = useState<DiagnosticItem[]>([
     {
       id: 'otg_cable',
@@ -154,6 +162,26 @@ export function DeviceOtgView({
     });
     downloadBlob(blob, `kaptureotg-android-profile-${activeProject.deviceProfile}.json`);
   };
+
+  const liveAppUrl =
+    typeof window !== 'undefined' ? window.location.origin : 'https://kaptureotg.app';
+
+  const handleExportApkPackage = () => {
+    const file = buildAndDownloadAndroidApkProject({
+      appUrl: liveAppUrl,
+      packageId: apkPackageId,
+      appName: apkAppName.trim() || 'KaptureOTG',
+      versionName: apkVersion.trim() || '1.0.0',
+      versionCode: 1,
+      minSdk: apkMinSdk,
+      project: activeProject,
+    });
+    setApkNotice(
+      `Paket proyek "${file}" berhasil diunduh. Ekstrak lalu jalankan "./gradlew assembleDebug" di Android Studio atau unggah ke GitHub untuk build APK otomatis via GitHub Actions.`
+    );
+  };
+
+  const pwaBuilderUrl = `https://www.pwabuilder.com/reportcard?site=${encodeURIComponent(liveAppUrl)}`;
 
   const usagePercent =
     quota.quotaBytes > 0 ? Math.min(100, Math.round((quota.usageBytes / quota.quotaBytes) * 100)) : 0;
@@ -268,6 +296,111 @@ export function DeviceOtgView({
               </button>
             ))}
           </div>
+        </div>
+        {/* Export Android APK Project Package */}
+        <div
+          id="ekspor-apk-android"
+          className="p-5 rounded-xl bg-white dark:bg-[#111419] border border-zinc-200 dark:border-zinc-800 space-y-4"
+        >
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+              <Package className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+              <span>Ekspor Paket APK Android (Android 7.0 – 14+)</span>
+            </div>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+              Unduh proyek Android siap kompilasi (Android Studio / Gradle / GitHub Actions) lengkap
+              dengan filter USB Host UVC Micro-USB, izin Kartu SD Android 10, dan manifest TWA —
+              atau kemas langsung menjadi file .APK online melalui PWABuilder.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="block text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
+                Application / Package ID
+              </label>
+              <input
+                type="text"
+                value={apkPackageId}
+                onChange={(e) => setApkPackageId(e.target.value)}
+                className="w-full min-h-[38px] px-3 text-xs font-mono rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
+                Nama Aplikasi Launcher
+              </label>
+              <input
+                type="text"
+                maxLength={24}
+                value={apkAppName}
+                onChange={(e) => setApkAppName(e.target.value)}
+                className="w-full min-h-[38px] px-3 text-xs rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
+                Versi APK
+              </label>
+              <input
+                type="text"
+                maxLength={16}
+                value={apkVersion}
+                onChange={(e) => setApkVersion(e.target.value)}
+                className="w-full min-h-[38px] px-3 text-xs font-mono rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="block text-[11px] font-medium text-zinc-600 dark:text-zinc-400">
+                Minimum Android SDK
+              </label>
+              <select
+                value={apkMinSdk}
+                onChange={(e) => setApkMinSdk(Number(e.target.value))}
+                className="w-full min-h-[38px] px-3 text-xs rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800"
+              >
+                <option value={24}>API 24 — Android 7.0 Nougat (Micro-USB OTG)</option>
+                <option value={26}>API 26 — Android 8.0 Oreo</option>
+                <option value={29}>API 29 — Android 10 (Legacy SD Card)</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="text-[11px] font-mono text-zinc-500 dark:text-zinc-400 leading-relaxed">
+            Isi paket ZIP: AndroidManifest.xml (USB Host + SD Card) · device_filter.xml (UVC Class
+            14 / MS2109) · MainActivity.java · build.gradle · twa-manifest.json · GitHub Actions
+            Auto-Build APK
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5 pt-1">
+            <button
+              type="button"
+              onClick={handleExportApkPackage}
+              className="min-h-[44px] px-4 rounded-lg bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white text-xs font-semibold inline-flex items-center gap-2 transition-all whitespace-nowrap cursor-pointer"
+            >
+              <Download className="w-4 h-4" />
+              Unduh Proyek APK Android (.zip)
+            </button>
+
+            <a
+              href={pwaBuilderUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="min-h-[44px] px-4 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900 text-zinc-800 dark:text-zinc-200 text-xs font-semibold inline-flex items-center gap-2 transition-colors whitespace-nowrap"
+            >
+              <span>Kemas APK Online (PWABuilder)</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+
+          {apkNotice && (
+            <p className="text-xs text-emerald-700 dark:text-emerald-400 leading-relaxed">
+              {apkNotice}
+            </p>
+          )}
         </div>
       </section>
 

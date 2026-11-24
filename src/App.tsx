@@ -569,6 +569,14 @@ function StudioWorkspace() {
             onSaveProjectNow={handleSaveProjectNow}
             onRecordingFinished={handleRecordingFinished}
             onNavigateExport={() => setActiveTab('export')}
+            onNavigateApkExport={() => {
+              setActiveTab('device');
+              setTimeout(() => {
+                document
+                  .getElementById('ekspor-apk-android')
+                  ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }, 80);
+            }}
           />
         )}
 
