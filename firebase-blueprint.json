@@ -1,0 +1,326 @@
+{
+  "entities": {
+    "CaptureProject": {
+      "title": "CaptureProject",
+      "description": "Cloud-synced Android USB video capture project preset with resolution, bitrate, crop, rotation, audio sync, and SD card storage profile.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Firebase Auth UID of the project owner."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "description": "Human-readable project name."
+        },
+        "deviceProfile": {
+          "type": "string",
+          "enum": ["android10_micro_usb", "android11_usbc", "desktop_uvc"],
+          "description": "Hardware USB OTG capture profile."
+        },
+        "resolutionWidth": {
+          "type": "number",
+          "description": "Output capture width in pixels (320-3840)."
+        },
+        "resolutionHeight": {
+          "type": "number",
+          "description": "Output capture height in pixels (240-2160)."
+        },
+        "fps": {
+          "type": "number",
+          "description": "Target frames per second (15-60)."
+        },
+        "format": {
+          "type": "string",
+          "enum": ["mp4", "webm"],
+          "description": "Output container format."
+        },
+        "videoBitrateMbps": {
+          "type": "number",
+          "description": "Video encoding bitrate in Mbps (1-80)."
+        },
+        "audioBitrateKbps": {
+          "type": "number",
+          "description": "Audio encoding bitrate in kbps (64-320)."
+        },
+        "audioSyncMs": {
+          "type": "number",
+          "description": "Audio sync offset in milliseconds (-500 to 500)."
+        },
+        "rotation": {
+          "type": "number",
+          "enum": [0, 90, 180, 270],
+          "description": "Real-time clockwise rotation angle in degrees."
+        },
+        "flipH": {
+          "type": "boolean",
+          "description": "Horizontal mirror flip toggle."
+        },
+        "flipV": {
+          "type": "boolean",
+          "description": "Vertical flip toggle."
+        },
+        "cropAspect": {
+          "type": "string",
+          "enum": ["free", "9:16", "16:9", "4:5", "1:1"],
+          "description": "Real-time crop aspect ratio preset."
+        },
+        "cropX": {
+          "type": "number",
+          "description": "Crop left offset percentage (0-95)."
+        },
+        "cropY": {
+          "type": "number",
+          "description": "Crop top offset percentage (0-95)."
+        },
+        "cropW": {
+          "type": "number",
+          "description": "Crop width percentage (5-100)."
+        },
+        "cropH": {
+          "type": "number",
+          "description": "Crop height percentage (5-100)."
+        },
+        "sdStoragePath": {
+          "type": "string",
+          "maxLength": 180,
+          "description": "Target external SD card folder path."
+        },
+        "sdSplitGb": {
+          "type": "number",
+          "enum": [0, 2, 4],
+          "description": "FAT32 automatic file split threshold in GB (0 = off)."
+        },
+        "watermarkFree": {
+          "type": "boolean",
+          "description": "Guarantees watermark-free high-res export."
+        },
+        "targetPlatform": {
+          "type": "string",
+          "enum": ["youtube", "youtube_shorts", "instagram_reels", "tiktok", "facebook", "archive"],
+          "description": "Primary publishing destination."
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 400,
+          "description": "Optional project capture notes."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last-modified timestamp."
+        }
+      },
+      "required": [
+        "ownerId",
+        "name",
+        "deviceProfile",
+        "resolutionWidth",
+        "resolutionHeight",
+        "fps",
+        "format",
+        "videoBitrateMbps",
+        "audioBitrateKbps",
+        "audioSyncMs",
+        "rotation",
+        "flipH",
+        "flipV",
+        "cropAspect",
+        "cropX",
+        "cropY",
+        "cropW",
+        "cropH",
+        "sdStoragePath",
+        "sdSplitGb",
+        "watermarkFree",
+        "targetPlatform",
+        "notes",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "CaptureRecording": {
+      "title": "CaptureRecording",
+      "description": "Metadata record of a video capture take synced across devices under a parent project.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Firebase Auth UID of the recording owner."
+        },
+        "projectId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Parent project document ID."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "description": "Recording clip title."
+        },
+        "durationSec": {
+          "type": "number",
+          "description": "Duration in seconds."
+        },
+        "resolution": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 32,
+          "description": "Rendered resolution string such as 1080x1920."
+        },
+        "fps": {
+          "type": "number",
+          "description": "Recorded frame rate."
+        },
+        "format": {
+          "type": "string",
+          "enum": ["mp4", "webm"],
+          "description": "Container format."
+        },
+        "videoBitrateMbps": {
+          "type": "number",
+          "description": "Configured video bitrate in Mbps."
+        },
+        "fileSizeBytes": {
+          "type": "number",
+          "description": "Rendered file size in bytes."
+        },
+        "rotation": {
+          "type": "number",
+          "enum": [0, 90, 180, 270],
+          "description": "Applied real-time rotation in degrees."
+        },
+        "audioSyncMs": {
+          "type": "number",
+          "description": "Applied audio sync offset in ms."
+        },
+        "watermarkFree": {
+          "type": "boolean",
+          "description": "True when rendered without watermark."
+        },
+        "storageTarget": {
+          "type": "string",
+          "maxLength": 180,
+          "description": "Local or SD card destination path."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["recorded", "exported", "published", "archived"],
+          "description": "Lifecycle state of the recording; archived is terminal."
+        },
+        "publishedPlatforms": {
+          "type": "array",
+          "description": "Allowlisted social platforms where this clip was shared."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last-modified timestamp."
+        }
+      },
+      "required": [
+        "ownerId",
+        "projectId",
+        "title",
+        "durationSec",
+        "resolution",
+        "fps",
+        "format",
+        "videoBitrateMbps",
+        "fileSizeBytes",
+        "rotation",
+        "audioSyncMs",
+        "watermarkFree",
+        "storageTarget",
+        "status",
+        "publishedPlatforms",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "UserPreference": {
+      "title": "UserPreference",
+      "description": "Non-PII cloud-synced studio UI and OTG defaults per user.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$",
+          "description": "Firebase Auth UID matching the document ID."
+        },
+        "themeMode": {
+          "type": "string",
+          "enum": ["auto", "dark", "light"],
+          "description": "Automatic dark mode preference."
+        },
+        "defaultOtgProfile": {
+          "type": "string",
+          "enum": ["android10_micro_usb", "android11_usbc", "desktop_uvc"],
+          "description": "Preferred default USB OTG profile."
+        },
+        "activeProjectId": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Last active project ID synced across devices."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server creation timestamp."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server last-modified timestamp."
+        }
+      },
+      "required": [
+        "ownerId",
+        "themeMode",
+        "defaultOtgProfile",
+        "activeProjectId",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/projects/{projectId}": {
+      "schema": {
+        "$ref": "#/entities/CaptureProject"
+      },
+      "description": "User-owned USB video capture projects synced across devices."
+    },
+    "/projects/{projectId}/recordings/{recordingId}": {
+      "schema": {
+        "$ref": "#/entities/CaptureRecording"
+      },
+      "description": "Recording and export metadata records belonging to a parent capture project."
+    },
+    "/userPreferences/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserPreference"
+      },
+      "description": "User-scoped UI theme and OTG defaults without PII."
+    }
+  }
+}

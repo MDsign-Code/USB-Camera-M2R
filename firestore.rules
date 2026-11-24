@@ -1,0 +1,253 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net (default deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Hardened Global Primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isProjectOwner(projectId) {
+      return exists(/databases/$(database)/documents/projects/$(projectId)) &&
+        get(/databases/$(database)/documents/projects/$(projectId)).data.ownerId == request.auth.uid;
+    }
+
+    // Validation Blueprints (Anti-Update-Gap)
+    function isValidProject(data) {
+      return data.keys().hasAll([
+        'ownerId', 'name', 'deviceProfile', 'resolutionWidth', 'resolutionHeight',
+        'fps', 'format', 'videoBitrateMbps', 'audioBitrateKbps', 'audioSyncMs',
+        'rotation', 'flipH', 'flipV', 'cropAspect', 'cropX', 'cropY', 'cropW', 'cropH',
+        'sdStoragePath', 'sdSplitGb', 'watermarkFree', 'targetPlatform', 'notes',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'ownerId', 'name', 'deviceProfile', 'resolutionWidth', 'resolutionHeight',
+        'fps', 'format', 'videoBitrateMbps', 'audioBitrateKbps', 'audioSyncMs',
+        'rotation', 'flipH', 'flipV', 'cropAspect', 'cropX', 'cropY', 'cropW', 'cropH',
+        'sdStoragePath', 'sdSplitGb', 'watermarkFree', 'targetPlatform', 'notes',
+        'createdAt', 'updatedAt'
+      ]) &&
+      isValidId(data.ownerId) &&
+      data.ownerId == request.auth.uid &&
+      data.name is string && data.name.size() >= 1 && data.name.size() <= 80 &&
+      data.deviceProfile in ['android10_micro_usb', 'android11_usbc', 'desktop_uvc'] &&
+      data.resolutionWidth is number && data.resolutionWidth >= 320 && data.resolutionWidth <= 3840 &&
+      data.resolutionHeight is number && data.resolutionHeight >= 240 && data.resolutionHeight <= 2160 &&
+      data.fps is number && data.fps >= 15 && data.fps <= 60 &&
+      data.format in ['mp4', 'webm'] &&
+      data.videoBitrateMbps is number && data.videoBitrateMbps >= 1 && data.videoBitrateMbps <= 80 &&
+      data.audioBitrateKbps is number && data.audioBitrateKbps >= 64 && data.audioBitrateKbps <= 320 &&
+      data.audioSyncMs is number && data.audioSyncMs >= -500 && data.audioSyncMs <= 500 &&
+      data.rotation in [0, 90, 180, 270] &&
+      data.flipH is bool &&
+      data.flipV is bool &&
+      data.cropAspect in ['free', '9:16', '16:9', '4:5', '1:1'] &&
+      data.cropX is number && data.cropX >= 0 && data.cropX <= 95 &&
+      data.cropY is number && data.cropY >= 0 && data.cropY <= 95 &&
+      data.cropW is number && data.cropW >= 5 && data.cropW <= 100 &&
+      data.cropH is number && data.cropH >= 5 && data.cropH <= 100 &&
+      data.cropX + data.cropW <= 100.5 &&
+      data.cropY + data.cropH <= 100.5 &&
+      data.sdStoragePath is string && data.sdStoragePath.size() >= 1 && data.sdStoragePath.size() <= 180 &&
+      data.sdSplitGb in [0, 2, 4] &&
+      data.watermarkFree is bool &&
+      data.targetPlatform in ['youtube', 'youtube_shorts', 'instagram_reels', 'tiktok', 'facebook', 'archive'] &&
+      data.notes is string && data.notes.size() <= 400 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidPlatformsList(platforms) {
+      return platforms is list &&
+        platforms.size() <= 6 &&
+        platforms.hasOnly(['youtube', 'youtube_shorts', 'instagram_reels', 'tiktok', 'facebook']) &&
+        (platforms.size() == 0 || platforms[0] is string);
+    }
+
+    function isValidRecording(data) {
+      return data.keys().hasAll([
+        'ownerId', 'projectId', 'title', 'durationSec', 'resolution', 'fps',
+        'format', 'videoBitrateMbps', 'fileSizeBytes', 'rotation', 'audioSyncMs',
+        'watermarkFree', 'storageTarget', 'status', 'publishedPlatforms',
+        'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'ownerId', 'projectId', 'title', 'durationSec', 'resolution', 'fps',
+        'format', 'videoBitrateMbps', 'fileSizeBytes', 'rotation', 'audioSyncMs',
+        'watermarkFree', 'storageTarget', 'status', 'publishedPlatforms',
+        'createdAt', 'updatedAt'
+      ]) &&
+      isValidId(data.ownerId) &&
+      data.ownerId == request.auth.uid &&
+      isValidId(data.projectId) &&
+      data.title is string && data.title.size() >= 1 && data.title.size() <= 120 &&
+      data.durationSec is number && data.durationSec >= 0 && data.durationSec <= 86400 &&
+      data.resolution is string && data.resolution.size() >= 3 && data.resolution.size() <= 32 &&
+      data.fps is number && data.fps >= 15 && data.fps <= 60 &&
+      data.format in ['mp4', 'webm'] &&
+      data.videoBitrateMbps is number && data.videoBitrateMbps >= 1 && data.videoBitrateMbps <= 80 &&
+      data.fileSizeBytes is number && data.fileSizeBytes >= 0 && data.fileSizeBytes <= 107374182400 &&
+      data.rotation in [0, 90, 180, 270] &&
+      data.audioSyncMs is number && data.audioSyncMs >= -500 && data.audioSyncMs <= 500 &&
+      data.watermarkFree is bool &&
+      data.storageTarget is string && data.storageTarget.size() >= 1 && data.storageTarget.size() <= 180 &&
+      data.status in ['recorded', 'exported', 'published', 'archived'] &&
+      isValidPlatformsList(data.publishedPlatforms) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidPreference(data, userId) {
+      return data.keys().hasAll([
+        'ownerId', 'themeMode', 'defaultOtgProfile', 'activeProjectId', 'createdAt', 'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'ownerId', 'themeMode', 'defaultOtgProfile', 'activeProjectId', 'createdAt', 'updatedAt'
+      ]) &&
+      isValidId(data.ownerId) &&
+      data.ownerId == request.auth.uid &&
+      data.ownerId == userId &&
+      data.themeMode in ['auto', 'dark', 'light'] &&
+      data.defaultOtgProfile in ['android10_micro_usb', 'android11_usbc', 'desktop_uvc'] &&
+      data.activeProjectId is string && data.activeProjectId.size() <= 128 &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    // Collection 1: Cloud-Synced Capture Projects
+    match /projects/{projectId} {
+      allow get: if isVerified() && isValidId(projectId) && existing().ownerId == request.auth.uid;
+
+      allow list: if isVerified() && resource.data.ownerId == request.auth.uid;
+
+      allow create: if isVerified() &&
+        isValidId(projectId) &&
+        isValidProject(incoming()) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isVerified() &&
+        isValidId(projectId) &&
+        isValidProject(incoming()) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'name', 'deviceProfile', 'resolutionWidth', 'resolutionHeight', 'fps',
+            'format', 'videoBitrateMbps', 'audioBitrateKbps', 'audioSyncMs',
+            'rotation', 'flipH', 'flipV', 'cropAspect', 'cropX', 'cropY', 'cropW', 'cropH',
+            'sdStoragePath', 'sdSplitGb', 'watermarkFree', 'targetPlatform', 'notes', 'updatedAt'
+          ]) ||
+          incoming().diff(existing()).affectedKeys().hasOnly([
+            'rotation', 'flipH', 'flipV', 'cropAspect', 'cropX', 'cropY', 'cropW', 'cropH', 'audioSyncMs', 'updatedAt'
+          ])
+        );
+
+      allow delete: if isVerified() && isValidId(projectId) && existing().ownerId == request.auth.uid;
+
+      // Collection 2: Project Recordings Subcollection (Master Gate enforced)
+      match /recordings/{recordingId} {
+        allow get: if isVerified() &&
+          isValidId(projectId) &&
+          isValidId(recordingId) &&
+          existing().ownerId == request.auth.uid &&
+          existing().projectId == projectId &&
+          isProjectOwner(projectId);
+
+        allow list: if isVerified() &&
+          resource.data.ownerId == request.auth.uid &&
+          resource.data.projectId == projectId;
+
+        allow create: if isVerified() &&
+          isValidId(projectId) &&
+          isValidId(recordingId) &&
+          isValidRecording(incoming()) &&
+          incoming().projectId == projectId &&
+          incoming().createdAt == request.time &&
+          incoming().updatedAt == request.time &&
+          isProjectOwner(projectId);
+
+        allow update: if isVerified() &&
+          isValidId(projectId) &&
+          isValidId(recordingId) &&
+          isValidRecording(incoming()) &&
+          existing().ownerId == request.auth.uid &&
+          existing().projectId == projectId &&
+          existing().status != 'archived' &&
+          incoming().ownerId == existing().ownerId &&
+          incoming().projectId == existing().projectId &&
+          incoming().createdAt == existing().createdAt &&
+          incoming().updatedAt == request.time &&
+          isProjectOwner(projectId) &&
+          (
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'title', 'resolution', 'format', 'videoBitrateMbps', 'fileSizeBytes', 'storageTarget', 'status', 'updatedAt'
+            ]) ||
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'status', 'publishedPlatforms', 'updatedAt'
+            ]) ||
+            (incoming().status == 'archived' && incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']))
+          );
+
+        allow delete: if isVerified() &&
+          isValidId(projectId) &&
+          isValidId(recordingId) &&
+          existing().ownerId == request.auth.uid &&
+          existing().projectId == projectId &&
+          isProjectOwner(projectId);
+      }
+    }
+
+    // Collection 3: User Studio Preferences (Strict Owner Isolation, Zero PII)
+    match /userPreferences/{userId} {
+      allow get: if isVerified() && isValidId(userId) && userId == request.auth.uid && existing().ownerId == request.auth.uid;
+
+      allow list: if false;
+
+      allow create: if isVerified() &&
+        isValidId(userId) &&
+        userId == request.auth.uid &&
+        isValidPreference(incoming(), userId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isVerified() &&
+        isValidId(userId) &&
+        userId == request.auth.uid &&
+        isValidPreference(incoming(), userId) &&
+        existing().ownerId == request.auth.uid &&
+        incoming().ownerId == existing().ownerId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (
+          incoming().diff(existing()).affectedKeys().hasOnly(['themeMode', 'defaultOtgProfile', 'activeProjectId', 'updatedAt'])
+        );
+
+      allow delete: if isVerified() && isValidId(userId) && userId == request.auth.uid && existing().ownerId == request.auth.uid;
+    }
+  }
+}

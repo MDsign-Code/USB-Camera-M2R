@@ -1,0 +1,6 @@
+{
+  "name": "KaptureOTG — Android USB Video Capture Studio",
+  "description": "Studio perekaman Android USB Video Capture latensi rendah untuk Android 10 ke bawah (Micro-USB OTG) & USB-C dengan penyimpanan kartu SD langsung, resolusi & bitrate MP4 kustom, sinkronisasi audio presisi, crop & rotasi 90° real-time, ekspor resolusi tinggi tanpa watermark, unggah instan YouTube/sosial media, serta sinkronisasi proyek cloud.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
